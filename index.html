@@ -8,204 +8,216 @@
 <style>
   :root {
     --bg: #0b0f17;
-    --card: #111a2b;
-    --card-hover: #17223a;
+    --panel: #111a2b;
+    --panel-hover: #182340;
     --border: #1f2c47;
     --text: #e9effc;
     --muted: #90a3c9;
+    --faint: #5d6f92;
     --accent: #4f8cff;
     --cyan: #22d3ee;
     --green: #34d399;
     --amber: #fbbf24;
     --pink: #f472b6;
+    --shadow: rgba(0,0,0,.35);
+  }
+  html[data-theme="light"] {
+    --bg: #f4f7fd;
+    --panel: #ffffff;
+    --panel-hover: #eef3fc;
+    --border: #dbe4f2;
+    --text: #14233d;
+    --muted: #5b6f92;
+    --faint: #8a9ab8;
+    --accent: #2563eb;
+    --cyan: #0891b2;
+    --green: #059669;
+    --amber: #b45309;
+    --pink: #db2777;
+    --shadow: rgba(20,40,80,.10);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: "Segoe UI", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;
     background:
-      radial-gradient(1100px 600px at 15% -10%, rgba(79,140,255,.20), transparent 60%),
-      radial-gradient(900px 520px at 95% 0%, rgba(34,211,238,.12), transparent 55%),
+      radial-gradient(1100px 600px at 15% -10%, rgba(79,140,255,.16), transparent 60%),
+      radial-gradient(900px 520px at 95% 0%, rgba(34,211,238,.10), transparent 55%),
       var(--bg);
     color: var(--text);
     min-height: 100vh;
-    line-height: 1.55;
+    line-height: 1.5;
   }
-  .wrap { max-width: 1100px; margin: 0 auto; padding: 48px 24px 60px; }
-  header { text-align: center; margin-bottom: 36px; }
-  header .kicker {
-    display: inline-block; font-size: 12px; letter-spacing: .18em;
-    color: var(--cyan); border: 1px solid rgba(34,211,238,.35);
-    padding: 5px 14px; border-radius: 999px; margin-bottom: 18px;
-    background: rgba(34,211,238,.08);
+  .wrap { max-width: 980px; margin: 0 auto; padding: 32px 20px 44px; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+  header .title { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  header h1 { font-size: 24px; font-weight: 700; letter-spacing: .02em; }
+  header .sub { color: var(--muted); font-size: 13.5px; }
+  #themeBtn {
+    cursor: pointer; font-size: 13px; color: var(--text);
+    background: var(--panel); border: 1px solid var(--border); border-radius: 999px;
+    padding: 8px 16px; transition: border-color .2s;
   }
-  header h1 {
-    font-size: clamp(28px, 4.5vw, 44px); font-weight: 700; letter-spacing: .02em;
-    background: linear-gradient(90deg, #ffffff, #9fc0ff 60%, #22d3ee);
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-  }
-  header p { color: var(--muted); margin-top: 10px; font-size: 15px; }
-  .controls {
-    display: flex; align-items: center; justify-content: center; gap: 12px;
-    flex-wrap: wrap; margin: 28px 0 34px;
-  }
+  #themeBtn:hover { border-color: var(--accent); }
+  .controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
   #search {
-    width: min(420px, 100%); padding: 12px 18px; border-radius: 12px;
-    border: 1px solid var(--border); background: rgba(17,26,43,.85);
-    color: var(--text); font-size: 14px; outline: none;
-    transition: border-color .2s, box-shadow .2s;
+    flex: 1; min-width: 220px; padding: 10px 16px; border-radius: 10px;
+    border: 1px solid var(--border); background: var(--panel); color: var(--text);
+    font-size: 13.5px; outline: none; transition: border-color .2s, box-shadow .2s;
   }
-  #search::placeholder { color: #5d6f92; }
-  #search:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,140,255,.18); }
+  #search::placeholder { color: var(--faint); }
+  #search:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,140,255,.16); }
   .pill {
-    cursor: pointer; user-select: none; font-size: 12.5px; color: var(--muted);
-    border: 1px solid var(--border); background: rgba(17,26,43,.7);
-    padding: 7px 14px; border-radius: 999px; transition: all .18s;
+    cursor: pointer; user-select: none; font-size: 12px; color: var(--muted);
+    border: 1px solid var(--border); background: var(--panel);
+    padding: 7px 13px; border-radius: 999px; transition: all .18s;
   }
   .pill:hover { color: var(--text); border-color: var(--accent); }
-  .pill.active { color: #0b0f17; background: var(--accent); border-color: var(--accent); font-weight: 600; }
-  .grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
-    gap: 18px;
+  .pill.active { color: #fff; background: var(--accent); border-color: var(--accent); font-weight: 600; }
+  .list { display: flex; flex-direction: column; gap: 8px; }
+  .row {
+    display: flex; align-items: center; gap: 14px;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    padding: 12px 16px; text-decoration: none; color: inherit;
+    transition: transform .15s, border-color .15s, background-color .15s, box-shadow .15s;
   }
-  .card {
-    display: flex; flex-direction: column; gap: 10px;
-    background: linear-gradient(180deg, rgba(23,34,58,.85), rgba(17,26,43,.9));
-    border: 1px solid var(--border); border-radius: 16px;
-    padding: 20px 20px 16px; text-decoration: none; color: inherit;
-    transition: transform .18s, border-color .18s, box-shadow .18s;
-    position: relative; overflow: hidden;
-  }
-  .card::before {
-    content: ""; position: absolute; inset: 0 0 auto 0; height: 3px;
-    background: linear-gradient(90deg, var(--accent), var(--cyan));
-    opacity: 0; transition: opacity .2s;
-  }
-  .card:hover { transform: translateY(-3px); border-color: #34508a; box-shadow: 0 12px 30px rgba(0,0,0,.35); }
-  .card:hover::before { opacity: 1; }
-  .card.hide { display: none; }
-  .card-top { display: flex; justify-content: space-between; align-items: center; }
+  .row:hover { transform: translateY(-1px); border-color: var(--accent); background: var(--panel-hover); box-shadow: 0 6px 18px var(--shadow); }
+  .row.hide { display: none; }
   .num {
+    flex: none; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
     font-size: 13px; font-weight: 700; color: var(--accent);
-    border: 1px solid rgba(79,140,255,.4); border-radius: 8px;
-    padding: 2px 9px; background: rgba(79,140,255,.10);
+    border: 1px solid rgba(79,140,255,.4); border-radius: 9px; background: rgba(79,140,255,.10);
   }
-  .badge {
-    font-size: 11px; padding: 3px 10px; border-radius: 999px; font-weight: 600;
-    letter-spacing: .03em;
+  .info { flex: 1; min-width: 0; }
+  .info h2 { font-size: 15.5px; font-weight: 650; }
+  .info .desc { color: var(--muted); font-size: 12.5px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .badges { display: flex; gap: 6px; align-items: center; flex: none; }
+  .badge, .tag { font-size: 11px; padding: 3px 9px; border-radius: 999px; font-weight: 600; white-space: nowrap; }
+  .badge.gh { color: var(--green); background: rgba(52,211,153,.10); border: 1px solid rgba(52,211,153,.35); }
+  .badge.cs { color: var(--amber); background: rgba(251,191,36,.10); border: 1px solid rgba(251,191,36,.35); }
+  .tag { color: var(--pink); background: rgba(244,114,182,.08); border: 1px solid rgba(244,114,182,.30); }
+  .host { flex: none; color: var(--faint); font-size: 12px; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .go { flex: none; color: var(--cyan); font-size: 14px; font-weight: 700; }
+  footer { text-align: center; color: var(--faint); font-size: 12px; margin-top: 22px; }
+  #count { color: var(--accent); font-weight: 600; }
+  @media (max-width: 720px) {
+    .badges { display: none; }
+    .host { display: none; }
   }
-  .badge.gh { color: var(--green); background: rgba(52,211,153,.12); border: 1px solid rgba(52,211,153,.35); }
-  .badge.cs { color: var(--amber); background: rgba(251,191,36,.12); border: 1px solid rgba(251,191,36,.35); }
-  .card h2 { font-size: 18px; font-weight: 650; }
-  .card .desc { color: var(--muted); font-size: 13.5px; flex: 1; }
-  .card .tags { display: flex; gap: 6px; flex-wrap: wrap; }
-  .card .tags span {
-    font-size: 11px; color: var(--pink); border: 1px solid rgba(244,114,182,.30);
-    background: rgba(244,114,182,.08); padding: 2px 8px; border-radius: 6px;
-  }
-  .card .foot {
-    display: flex; justify-content: space-between; align-items: center;
-    padding-top: 10px; border-top: 1px dashed var(--border);
-  }
-  .card .host { font-size: 12px; color: #5d6f92; max-width: 70%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .card .go { font-size: 13px; color: var(--cyan); font-weight: 600; }
-  footer { text-align: center; color: #5d6f92; font-size: 12.5px; margin-top: 42px; }
-  #count { color: var(--cyan); font-weight: 600; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <span class="kicker">SPREAD MONITOR DIRECTORY</span>
-    <h1>价差监控黄页</h1>
-    <p>八个独立部署的价差监控站点 · 一键直达</p>
+    <div class="title">
+      <h1>价差监控黄页</h1>
+      <span class="sub">八个独立部署的价差监控站点 · 一键直达</span>
+    </div>
+    <button id="themeBtn" type="button" aria-label="切换白天/夜间模式"></button>
   </header>
 
   <div class="controls">
     <input id="search" type="search" placeholder="搜索站点名称、标的或关键词…" autocomplete="off">
-    <span class="pill" data-filter="all">全部</span>
+    <span class="pill active" data-filter="all">全部</span>
     <span class="pill" data-filter="gh">GitHub Pages</span>
     <span class="pill" data-filter="cs">ChatGPT 站点</span>
   </div>
 
-  <main class="grid" id="grid">
-    <a class="card" href="https://surfacebuaa-maker.github.io/spread-monitor-summary/" target="_blank" rel="noopener"
-       data-kw="a股 汇总 giga kstr 科创50 cxmt 长鑫 提醒面板 spread-monitor-summary">
-      <div class="card-top"><span class="num">01</span><span class="badge gh">GitHub Pages</span></div>
-      <h2>A股价差监控</h2>
-      <p class="desc">GIGADEV · KSTR×科创50 · CXMT 多标的价差提醒面板汇总，一页看全。</p>
-      <div class="tags"><span>A股</span><span>汇总面板</span></div>
-      <div class="foot"><span class="host">surfacebuaa-maker.github.io</span><span class="go">访问 →</span></div>
+  <main class="list" id="list">
+    <a class="row" href="https://surfacebuaa-maker.github.io/spread-monitor-summary/" target="_blank" rel="noopener"
+       data-kw="a股 汇总 giga kstr 科创50 cxmt 长鑫 提醒面板 spread-monitor-summary github">
+      <span class="num">01</span>
+      <div class="info"><h2>A股价差监控</h2><p class="desc">GIGADEV · KSTR×科创50 · CXMT 多标的价差提醒面板汇总</p></div>
+      <span class="badges"><span class="badge gh">GitHub Pages</span><span class="tag">A股</span></span>
+      <span class="host">surfacebuaa-maker.github.io</span>
+      <span class="go">→</span>
     </a>
 
-    <a class="card" href="https://arb-spread-radar.sdkaixin18.chatgpt.site/" target="_blank" rel="noopener"
-       data-kw="bp 股票 价差雷达 arb spread radar">
-      <div class="card-top"><span class="num">02</span><span class="badge cs">ChatGPT 站点</span></div>
-      <h2>BP股票价差监控</h2>
-      <p class="desc">BP 股票相关价差雷达，跟踪合约与真实市场的开平仓价差。</p>
-      <div class="tags"><span>美股</span><span>价差雷达</span></div>
-      <div class="foot"><span class="host">arb-spread-radar.sdkaixin18.chatgpt.site</span><span class="go">访问 →</span></div>
+    <a class="row" href="https://arb-spread-radar.sdkaixin18.chatgpt.site/" target="_blank" rel="noopener"
+       data-kw="bp 股票 价差雷达 arb spread radar chatgpt">
+      <span class="num">02</span>
+      <div class="info"><h2>BP股票价差监控</h2><p class="desc">BP 股票相关价差雷达，跟踪合约与真实市场的开平仓价差</p></div>
+      <span class="badges"><span class="badge cs">ChatGPT 站点</span><span class="tag">美股</span></span>
+      <span class="host">arb-spread-radar.sdkaixin18.chatgpt.site</span>
+      <span class="go">→</span>
     </a>
 
-    <a class="card" href="https://gigadev-basis-monitor.surface-buaa139523.chatgpt.site" target="_blank" rel="noopener"
-       data-kw="兆易创新 giga gigadev 基差 basis monitor">
-      <div class="card-top"><span class="num">03</span><span class="badge cs">ChatGPT 站点</span></div>
-      <h2>兆易创新价差监控</h2>
-      <p class="desc">GIGADEV 基差监控，追踪兆易创新合约与现货的价差走势。</p>
-      <div class="tags"><span>兆易创新</span><span>GIGADEV</span><span>基差</span></div>
-      <div class="foot"><span class="host">gigadev-basis-monitor.surface-buaa139523.chatgpt.site</span><span class="go">访问 →</span></div>
+    <a class="row" href="https://gigadev-basis-monitor.surface-buaa139523.chatgpt.site" target="_blank" rel="noopener"
+       data-kw="兆易创新 giga gigadev 基差 basis monitor chatgpt">
+      <span class="num">03</span>
+      <div class="info"><h2>兆易创新价差监控</h2><p class="desc">GIGADEV 基差监控，追踪兆易创新合约与现货的价差走势</p></div>
+      <span class="badges"><span class="badge cs">ChatGPT 站点</span><span class="tag">兆易创新</span></span>
+      <span class="host">gigadev-basis-monitor.surface-buaa139523.chatgpt.site</span>
+      <span class="go">→</span>
     </a>
 
-    <a class="card" href="https://star50-kstr-spread.surface-buaa139523.chatgpt.site" target="_blank" rel="noopener"
-       data-kw="科创50 etf kstr star50 价差 spread">
-      <div class="card-top"><span class="num">04</span><span class="badge cs">ChatGPT 站点</span></div>
-      <h2>科创50ETF价差监控</h2>
-      <p class="desc">STAR50 × KSTR 价差监控，跟踪科创50 ETF 与相关合约的价差变化。</p>
-      <div class="tags"><span>科创50</span><span>STAR50</span><span>KSTR</span></div>
-      <div class="foot"><span class="host">star50-kstr-spread.surface-buaa139523.chatgpt.site</span><span class="go">访问 →</span></div>
+    <a class="row" href="https://star50-kstr-spread.surface-buaa139523.chatgpt.site" target="_blank" rel="noopener"
+       data-kw="科创50 etf kstr star50 价差 spread chatgpt">
+      <span class="num">04</span>
+      <div class="info"><h2>科创50ETF价差监控</h2><p class="desc">STAR50 × KSTR 价差监控，跟踪科创50 ETF 与相关合约的价差变化</p></div>
+      <span class="badges"><span class="badge cs">ChatGPT 站点</span><span class="tag">科创50</span></span>
+      <span class="host">star50-kstr-spread.surface-buaa139523.chatgpt.site</span>
+      <span class="go">→</span>
     </a>
 
-    <a class="card" href="https://cxmt-spread-watch.surface-buaa139523.chatgpt.site" target="_blank" rel="noopener"
-       data-kw="长鑫科技 cxmt 价差 watch 监控">
-      <div class="card-top"><span class="num">05</span><span class="badge cs">ChatGPT 站点</span></div>
-      <h2>长鑫科技价差监控</h2>
-      <p class="desc">CXMT 长鑫科技价差监控，跟踪相关合约与现货的价差提醒。</p>
-      <div class="tags"><span>长鑫科技</span><span>CXMT</span></div>
-      <div class="foot"><span class="host">cxmt-spread-watch.surface-buaa139523.chatgpt.site</span><span class="go">访问 →</span></div>
+    <a class="row" href="https://cxmt-spread-watch.surface-buaa139523.chatgpt.site" target="_blank" rel="noopener"
+       data-kw="长鑫科技 cxmt 价差 watch 监控 chatgpt">
+      <span class="num">05</span>
+      <div class="info"><h2>长鑫科技价差监控</h2><p class="desc">CXMT 长鑫科技价差监控，跟踪相关合约与现货的价差提醒</p></div>
+      <span class="badges"><span class="badge cs">ChatGPT 站点</span><span class="tag">长鑫科技</span></span>
+      <span class="host">cxmt-spread-watch.surface-buaa139523.chatgpt.site</span>
+      <span class="go">→</span>
     </a>
 
-    <a class="card" href="https://skhynix-skhy-spread.surface-buaa139523.chatgpt.site" target="_blank" rel="noopener"
-       data-kw="韩美海力士 sk hynix skhy 价差 spread">
-      <div class="card-top"><span class="num">06</span><span class="badge cs">ChatGPT 站点</span></div>
-      <h2>韩美海力士价差监控</h2>
-      <p class="desc">SK Hynix（SKHY）价差监控，追踪海力士相关合约与现货价差。</p>
-      <div class="tags"><span>SK Hynix</span><span>SKHY</span></div>
-      <div class="foot"><span class="host">skhynix-skhy-spread.surface-buaa139523.chatgpt.site</span><span class="go">访问 →</span></div>
+    <a class="row" href="https://skhynix-skhy-spread.surface-buaa139523.chatgpt.site" target="_blank" rel="noopener"
+       data-kw="韩美海力士 sk hynix skhy 价差 spread chatgpt">
+      <span class="num">06</span>
+      <div class="info"><h2>韩美海力士价差监控</h2><p class="desc">SK Hynix（SKHY）价差监控，追踪海力士相关合约与现货价差</p></div>
+      <span class="badges"><span class="badge cs">ChatGPT 站点</span><span class="tag">SK Hynix</span></span>
+      <span class="host">skhynix-skhy-spread.surface-buaa139523.chatgpt.site</span>
+      <span class="go">→</span>
     </a>
 
-    <a class="card" href="https://surfacebuaa-maker.github.io/gate-spread-radar/" target="_blank" rel="noopener"
-       data-kw="gate 股票合约 价差雷达 gate-spread-radar">
-      <div class="card-top"><span class="num">07</span><span class="badge gh">GitHub Pages</span></div>
-      <h2>Gate 股票合约价差监控</h2>
-      <p class="desc">Gate.io 股票合约 × 真实市场开平仓价差雷达，实时监控。</p>
-      <div class="tags"><span>Gate.io</span><span>股票合约</span></div>
-      <div class="foot"><span class="host">surfacebuaa-maker.github.io</span><span class="go">访问 →</span></div>
+    <a class="row" href="https://surfacebuaa-maker.github.io/gate-spread-radar/" target="_blank" rel="noopener"
+       data-kw="gate 股票合约 价差雷达 gate-spread-radar github">
+      <span class="num">07</span>
+      <div class="info"><h2>Gate 股票合约价差监控</h2><p class="desc">Gate.io 股票合约 × 真实市场开平仓价差雷达，实时监控</p></div>
+      <span class="badges"><span class="badge gh">GitHub Pages</span><span class="tag">Gate.io</span></span>
+      <span class="host">surfacebuaa-maker.github.io</span>
+      <span class="go">→</span>
     </a>
 
-    <a class="card" href="https://surfacebuaa-maker.github.io/sf-spread-monitor/" target="_blank" rel="noopener"
-       data-kw="okx bstocks 币安 股票合约 收敛 sf spread monitor">
-      <div class="card-top"><span class="num">08</span><span class="badge gh">GitHub Pages</span></div>
-      <h2>OKX bStocks价差监控</h2>
-      <p class="desc">OKX xStocks ↔ 币安股票合约价差收敛监控，跨所价差一目了然。</p>
-      <div class="tags"><span>OKX</span><span>xStocks</span><span>币安</span><span>收敛</span></div>
-      <div class="foot"><span class="host">surfacebuaa-maker.github.io</span><span class="go">访问 →</span></div>
+    <a class="row" href="https://surfacebuaa-maker.github.io/sf-spread-monitor/" target="_blank" rel="noopener"
+       data-kw="okx bstocks 币安 股票合约 收敛 sf spread monitor github">
+      <span class="num">08</span>
+      <div class="info"><h2>OKX bStocks价差监控</h2><p class="desc">OKX xStocks ↔ 币安股票合约价差收敛监控，跨所价差一目了然</p></div>
+      <span class="badges"><span class="badge gh">GitHub Pages</span><span class="tag">OKX</span></span>
+      <span class="host">surfacebuaa-maker.github.io</span>
+      <span class="go">→</span>
     </a>
   </main>
 
-  <footer>共 <span id="count">8</span> 个价差监控站点 · 2026-08-06 收录 · 点击卡片即可跳转</footer>
+  <footer>共 <span id="count">8</span> 个价差监控站点 · 2026-08-06 收录 · 点击任意一行即可跳转</footer>
 </div>
 
 <script>
-  const cards = Array.from(document.querySelectorAll('.card'));
+  const root = document.documentElement;
+  const themeBtn = document.getElementById('themeBtn');
+  const savedTheme = localStorage.getItem('spread-yp-theme');
+  const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+  root.dataset.theme = savedTheme || (prefersLight ? 'light' : 'dark');
+
+  function paint() {
+    const isDark = root.dataset.theme === 'dark';
+    themeBtn.textContent = isDark ? '☀️ 白天模式' : '🌙 夜间模式';
+  }
+  themeBtn.addEventListener('click', () => {
+    root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('spread-yp-theme', root.dataset.theme);
+    paint();
+  });
+  paint();
+
+  const rows = Array.from(document.querySelectorAll('.row'));
   const search = document.getElementById('search');
   const count = document.getElementById('count');
   const pills = Array.from(document.querySelectorAll('.pill'));
@@ -214,11 +226,11 @@
   function apply() {
     const q = search.value.trim().toLowerCase();
     let shown = 0;
-    cards.forEach(c => {
-      const okFilter = activeFilter === 'all' || c.dataset.kw.includes(activeFilter === 'gh' ? 'github' : 'chatgpt');
-      const okQuery = !q || c.dataset.kw.toLowerCase().includes(q);
+    rows.forEach(r => {
+      const okFilter = activeFilter === 'all' || r.dataset.kw.includes(activeFilter === 'gh' ? 'github' : 'chatgpt');
+      const okQuery = !q || r.dataset.kw.toLowerCase().includes(q);
       const visible = okFilter && okQuery;
-      c.classList.toggle('hide', !visible);
+      r.classList.toggle('hide', !visible);
       if (visible) shown++;
     });
     count.textContent = shown;

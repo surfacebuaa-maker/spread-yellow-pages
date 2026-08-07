@@ -87,6 +87,22 @@
     font-size: 13px; font-weight: 700; color: var(--accent);
     border: 1px solid rgba(79,140,255,.4); border-radius: 9px; background: rgba(79,140,255,.10);
   }
+  .drag {
+    flex: none; cursor: grab; color: var(--faint); font-size: 15px; padding: 2px 4px;
+    user-select: none; -webkit-user-select: none; touch-action: none;
+  }
+  .drag:hover { color: var(--accent); }
+  .drag:active { cursor: grabbing; }
+  .row.dragging { opacity: .45; border-style: dashed; }
+  .row.drag-over { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(79,140,255,.35); }
+  .mv { display: none; flex-direction: column; gap: 3px; flex: none; }
+  .mv-btn {
+    cursor: pointer; font-size: 10px; line-height: 1; padding: 3px 5px; text-align: center;
+    color: var(--muted); background: var(--panel-hover); border: 1px solid var(--border); border-radius: 6px;
+    user-select: none; -webkit-user-select: none;
+  }
+  .mv-btn:hover { color: var(--accent); border-color: var(--accent); }
+  @media (hover: none) { .drag { display: none; } .mv { display: flex; } }
   .info { flex: 1; min-width: 0; }
   .info h2 { font-size: 15.5px; font-weight: 650; }
   .info .desc { color: var(--muted); font-size: 12.5px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -120,6 +136,7 @@
     <span class="pill active" data-filter="all">全部</span>
     <span class="pill" data-filter="gh">GitHub Pages</span>
     <span class="pill" data-filter="cs">ChatGPT 站点</span>
+    <button id="resetOrder" class="pill" type="button" title="恢复为默认顺序">↺ 恢复默认</button>
   </div>
 
   <main class="list" id="list">
@@ -196,7 +213,7 @@
     </a>
   </main>
 
-  <footer>共 <span id="count">8</span> 个价差监控站点 · 2026-08-06 收录 · 点击任意一行即可跳转</footer>
+  <footer>共 <span id="count">8</span> 个价差监控站点 · 2026-08-06 收录 · 点击任意一行即可跳转 · 拖拽 ⠿ 可调整顺序（保存在本浏览器）</footer>
 </div>
 
 <script>
@@ -218,6 +235,90 @@
   paint();
 
   const rows = Array.from(document.querySelectorAll('.row'));
+  const list = document.getElementById('list');
+  const orderKey = 'spread-yp-order';
+  let dragHref = null;
+
+  function renumber() {
+    rows.forEach((r, i) => {
+      const n = r.querySelector('.num');
+      if (n) n.textContent = String(i + 1).padStart(2, '0');
+    });
+  }
+  function syncRows() {
+    rows.length = 0;
+    Array.prototype.push.apply(rows, Array.from(list.querySelectorAll('.row')));
+  }
+  function saveOrder() {
+    localStorage.setItem(orderKey, JSON.stringify(rows.map(r => r.href)));
+  }
+  function applyOrder(saved) {
+    if (!Array.isArray(saved) || !saved.length) return;
+    const byHref = new Map(rows.map(r => [r.href, r]));
+    saved.forEach(h => { const el = byHref.get(h); if (el) list.appendChild(el); });
+    syncRows();
+    renumber();
+  }
+  function moveRow(r, dir) {
+    const i = rows.indexOf(r), j = i + dir;
+    if (i < 0 || j < 0 || j >= rows.length) return;
+    list.insertBefore(rows[i], dir < 0 ? rows[j] : rows[j].nextSibling);
+    syncRows();
+    renumber();
+    saveOrder();
+    apply();
+  }
+
+  rows.forEach(r => {
+    const h = document.createElement('span');
+    h.className = 'drag'; h.title = '拖拽调整顺序'; h.textContent = '⠿';
+    h.setAttribute('draggable', 'true');
+    r.insertBefore(h, r.firstChild);
+    const mv = document.createElement('span');
+    mv.className = 'mv';
+    mv.innerHTML = '<span class="mv-btn mv-up" role="button" title="上移">↑</span><span class="mv-btn mv-down" role="button" title="下移">↓</span>';
+    r.insertBefore(mv, r.firstChild);
+
+    h.addEventListener('dragstart', e => {
+      dragHref = r.href;
+      r.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      try { e.dataTransfer.setData('text/plain', r.href); } catch (err) {}
+    });
+    h.addEventListener('dragend', () => {
+      dragHref = null;
+      r.classList.remove('dragging');
+      rows.forEach(x => x.classList.remove('drag-over'));
+    });
+    r.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      r.classList.add('drag-over');
+    });
+    r.addEventListener('dragleave', () => r.classList.remove('drag-over'));
+    r.addEventListener('drop', e => {
+      e.preventDefault();
+      r.classList.remove('drag-over');
+      const from = dragHref ? rows.find(x => x.href === dragHref) : null;
+      if (!from || from === r) return;
+      const after = (from.compareDocumentPosition(r) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
+      list.insertBefore(from, after ? r.nextSibling : r);
+      syncRows();
+      renumber();
+      saveOrder();
+      apply();
+    });
+    const up = r.querySelector('.mv-up'), down = r.querySelector('.mv-down');
+    if (up) up.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); moveRow(r, -1); });
+    if (down) down.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); moveRow(r, 1); });
+  });
+
+  applyOrder(JSON.parse(localStorage.getItem(orderKey) || 'null'));
+  document.getElementById('resetOrder').addEventListener('click', () => {
+    localStorage.removeItem(orderKey);
+    location.reload();
+  });
+
   const search = document.getElementById('search');
   const count = document.getElementById('count');
   const pills = Array.from(document.querySelectorAll('.pill'));

@@ -102,6 +102,13 @@
   }
   .row.drag-over-before::before { top: -6px; }
   .row.drag-over-after::after { bottom: -6px; }
+  .drag-placeholder {
+    min-height: 69px; display: flex; align-items: center; justify-content: center;
+    border: 2px dashed var(--accent); border-radius: 12px;
+    background: rgba(79,140,255,.08); color: var(--accent);
+    font-size: 12px; pointer-events: auto;
+  }
+  .drag-placeholder::after { content: '插入到这里'; }
   .mv { display: none; flex-direction: column; gap: 3px; flex: none; }
   .mv-btn {
     cursor: pointer; font-size: 10px; line-height: 1; padding: 3px 5px; text-align: center;
@@ -245,6 +252,9 @@
   const list = document.getElementById('list');
   const orderKey = 'spread-yp-order';
   let dragHref = null;
+  let dragSource = null;
+  let dragOriginalNext = null;
+  let dragPlaceholder = null;
 
   function clearDropIndicators() {
     rows.forEach(x => x.classList.remove('drag-over', 'drag-over-before', 'drag-over-after'));
@@ -252,6 +262,36 @@
   function dropBefore(target, e) {
     const rect = target.getBoundingClientRect();
     return e.clientY < rect.top + rect.height / 2;
+  }
+  function movePlaceholder(target, before) {
+    if (!dragPlaceholder || !dragSource || target === dragSource) return;
+    const anchor = before ? target : target.nextSibling;
+    if (anchor !== dragPlaceholder) list.insertBefore(dragPlaceholder, anchor);
+  }
+  function finishDrag(committed) {
+    clearDropIndicators();
+    if (dragPlaceholder && dragPlaceholder.parentNode) dragPlaceholder.remove();
+    if (dragSource) {
+      dragSource.style.display = '';
+      dragSource.classList.remove('dragging');
+      if (!committed) {
+        if (dragOriginalNext && dragOriginalNext.parentNode === list) list.insertBefore(dragSource, dragOriginalNext);
+        else list.appendChild(dragSource);
+      }
+    }
+    dragHref = null;
+    dragSource = null;
+    dragOriginalNext = null;
+    dragPlaceholder = null;
+  }
+  function commitDrag() {
+    if (!dragSource || !dragPlaceholder) return;
+    list.insertBefore(dragSource, dragPlaceholder);
+    syncRows();
+    renumber();
+    saveOrder();
+    apply();
+    finishDrag(true);
   }
 
   function renumber() {
@@ -296,14 +336,26 @@
 
     h.addEventListener('dragstart', e => {
       dragHref = r.href;
+      dragSource = r;
+      dragOriginalNext = r.nextElementSibling;
+      dragPlaceholder = document.createElement('div');
+      dragPlaceholder.className = 'drag-placeholder';
+      dragPlaceholder.style.height = `${r.getBoundingClientRect().height}px`;
+      list.insertBefore(dragPlaceholder, r);
       r.classList.add('dragging');
+      requestAnimationFrame(() => {
+        if (dragSource === r) r.style.display = 'none';
+      });
+      dragPlaceholder.addEventListener('dragover', event => event.preventDefault());
+      dragPlaceholder.addEventListener('drop', event => {
+        event.preventDefault();
+        commitDrag();
+      });
       e.dataTransfer.effectAllowed = 'move';
       try { e.dataTransfer.setData('text/plain', r.href); } catch (err) {}
     });
     h.addEventListener('dragend', () => {
-      dragHref = null;
-      r.classList.remove('dragging');
-      clearDropIndicators();
+      finishDrag(false);
     });
     r.addEventListener('dragover', e => {
       e.preventDefault();
@@ -315,6 +367,7 @@
       }
       clearDropIndicators();
       const before = dropBefore(r, e);
+      movePlaceholder(r, before);
       r.classList.add('drag-over', before ? 'drag-over-before' : 'drag-over-after');
     });
     r.addEventListener('dragleave', e => {
@@ -330,12 +383,8 @@
         return;
       }
       const before = dropBefore(r, e);
-      list.insertBefore(from, before ? r : r.nextSibling);
-      clearDropIndicators();
-      syncRows();
-      renumber();
-      saveOrder();
-      apply();
+      movePlaceholder(r, before);
+      commitDrag();
     });
     const up = r.querySelector('.mv-up'), down = r.querySelector('.mv-down');
     if (up) up.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); moveRow(r, -1); });

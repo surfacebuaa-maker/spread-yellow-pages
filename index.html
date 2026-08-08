@@ -94,14 +94,8 @@
   }
   .drag:hover { color: var(--accent); }
   .drag:active { cursor: grabbing; }
-  .row.dragging { opacity: .45; border-style: dashed; }
+  .row.dragging { opacity: 0; pointer-events: none; }
   .row.drag-over { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(79,140,255,.18); }
-  .row.drag-over-before::before, .row.drag-over-after::after {
-    content: ''; position: absolute; left: 12px; right: 12px; height: 3px;
-    background: var(--accent); border-radius: 999px; pointer-events: none; z-index: 2;
-  }
-  .row.drag-over-before::before { top: -6px; }
-  .row.drag-over-after::after { bottom: -6px; }
   .drag-placeholder {
     min-height: 69px; display: flex; align-items: center; justify-content: center;
     border: 2px dashed var(--accent); border-radius: 12px;
@@ -251,38 +245,51 @@
   const rows = Array.from(document.querySelectorAll('.row'));
   const list = document.getElementById('list');
   const orderKey = 'spread-yp-order';
-  let dragHref = null;
   let dragSource = null;
   let dragOriginalNext = null;
   let dragPlaceholder = null;
+  let dragHandle = null;
+  let dragPointerId = null;
+  let dragSourceStyle = '';
 
   function clearDropIndicators() {
-    rows.forEach(x => x.classList.remove('drag-over', 'drag-over-before', 'drag-over-after'));
+    rows.forEach(x => x.classList.remove('drag-over'));
   }
-  function dropBefore(target, e) {
-    const rect = target.getBoundingClientRect();
-    return e.clientY < rect.top + rect.height / 2;
-  }
-  function movePlaceholder(target, before) {
-    if (!dragPlaceholder || !dragSource || target === dragSource) return;
-    const anchor = before ? target : target.nextSibling;
+  function movePlaceholderByY(clientY) {
+    if (!dragPlaceholder || !dragSource) return;
+    const candidates = rows.filter(r => r !== dragSource && !r.classList.contains('hide'));
+    const target = candidates.find(r => {
+      const rect = r.getBoundingClientRect();
+      return clientY < rect.top + rect.height / 2;
+    });
+    const anchor = target || null;
     if (anchor !== dragPlaceholder) list.insertBefore(dragPlaceholder, anchor);
+    clearDropIndicators();
+    if (target) target.classList.add('drag-over');
   }
   function finishDrag(committed) {
     clearDropIndicators();
-    if (dragPlaceholder && dragPlaceholder.parentNode) dragPlaceholder.remove();
-    if (dragSource) {
-      dragSource.style.display = '';
-      dragSource.classList.remove('dragging');
-      if (!committed) {
-        if (dragOriginalNext && dragOriginalNext.parentNode === list) list.insertBefore(dragSource, dragOriginalNext);
-        else list.appendChild(dragSource);
-      }
+    const source = dragSource;
+    const placeholder = dragPlaceholder;
+    if (!source) return;
+    if (committed && placeholder && placeholder.parentNode === list) {
+      list.insertBefore(source, placeholder);
+    } else if (!committed) {
+      if (dragOriginalNext && dragOriginalNext.parentNode === list) list.insertBefore(source, dragOriginalNext);
+      else list.appendChild(source);
     }
-    dragHref = null;
+    if (placeholder && placeholder.parentNode) placeholder.remove();
+    source.style.cssText = dragSourceStyle;
+    source.classList.remove('dragging');
+    if (dragHandle && dragPointerId !== null) {
+      try { dragHandle.releasePointerCapture(dragPointerId); } catch (err) {}
+    }
     dragSource = null;
     dragOriginalNext = null;
     dragPlaceholder = null;
+    dragHandle = null;
+    dragPointerId = null;
+    dragSourceStyle = '';
   }
   function commitDrag() {
     if (!dragSource || !dragPlaceholder) return;
@@ -327,64 +334,51 @@
   rows.forEach(r => {
     const h = document.createElement('span');
     h.className = 'drag'; h.title = '拖拽插入调整顺序'; h.textContent = '⠿';
-    h.setAttribute('draggable', 'true');
+    h.setAttribute('role', 'button');
     r.insertBefore(h, r.firstChild);
     const mv = document.createElement('span');
     mv.className = 'mv';
     mv.innerHTML = '<span class="mv-btn mv-up" role="button" title="上移">↑</span><span class="mv-btn mv-down" role="button" title="下移">↓</span>';
     r.insertBefore(mv, r.firstChild);
 
-    h.addEventListener('dragstart', e => {
-      dragHref = r.href;
+    h.addEventListener('pointerdown', e => {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      e.preventDefault();
+      e.stopPropagation();
       dragSource = r;
       dragOriginalNext = r.nextElementSibling;
+      dragHandle = h;
+      dragPointerId = e.pointerId;
+      dragSourceStyle = r.style.cssText;
+      const rect = r.getBoundingClientRect();
       dragPlaceholder = document.createElement('div');
       dragPlaceholder.className = 'drag-placeholder';
-      dragPlaceholder.style.height = `${r.getBoundingClientRect().height}px`;
+      dragPlaceholder.style.height = `${rect.height}px`;
       list.insertBefore(dragPlaceholder, r);
       r.classList.add('dragging');
-      requestAnimationFrame(() => {
-        if (dragSource === r) r.style.display = 'none';
-      });
-      dragPlaceholder.addEventListener('dragover', event => event.preventDefault());
-      dragPlaceholder.addEventListener('drop', event => {
-        event.preventDefault();
-        commitDrag();
-      });
-      e.dataTransfer.effectAllowed = 'move';
-      try { e.dataTransfer.setData('text/plain', r.href); } catch (err) {}
+      r.style.cssText = `${dragSourceStyle}; position: fixed; left: -100000px; top: -100000px; width: ${rect.width}px; pointer-events: none; opacity: 0;`;
+      try { h.setPointerCapture(e.pointerId); } catch (err) {}
+      movePlaceholderByY(e.clientY);
     });
-    h.addEventListener('dragend', () => {
-      finishDrag(false);
-    });
-    r.addEventListener('dragover', e => {
+    h.addEventListener('pointermove', e => {
+      if (dragSource !== r || dragPointerId !== e.pointerId) return;
       e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      const from = dragHref ? rows.find(x => x.href === dragHref) : null;
-      if (!from || from === r) {
-        clearDropIndicators();
-        return;
-      }
-      clearDropIndicators();
-      const before = dropBefore(r, e);
-      movePlaceholder(r, before);
-      r.classList.add('drag-over', before ? 'drag-over-before' : 'drag-over-after');
+      movePlaceholderByY(e.clientY);
     });
-    r.addEventListener('dragleave', e => {
-      if (!e.relatedTarget || !r.contains(e.relatedTarget)) {
-        r.classList.remove('drag-over', 'drag-over-before', 'drag-over-after');
-      }
-    });
-    r.addEventListener('drop', e => {
+    h.addEventListener('pointerup', e => {
+      if (dragSource !== r || dragPointerId !== e.pointerId) return;
       e.preventDefault();
-      const from = dragHref ? rows.find(x => x.href === dragHref) : null;
-      if (!from || from === r) {
-        clearDropIndicators();
-        return;
-      }
-      const before = dropBefore(r, e);
-      movePlaceholder(r, before);
       commitDrag();
+    });
+    h.addEventListener('pointercancel', () => {
+      if (dragSource === r) finishDrag(false);
+    });
+    h.addEventListener('lostpointercapture', e => {
+      if (dragSource === r && dragPointerId === e.pointerId) finishDrag(false);
+    });
+    h.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
     });
     const up = r.querySelector('.mv-up'), down = r.querySelector('.mv-down');
     if (up) up.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); moveRow(r, -1); });

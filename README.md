@@ -1,6 +1,6 @@
 # 价差监控黄页
 
-十一个独立交易监控站点的一站式导航页，纯静态站点，部署于 GitHub Pages。
+十二个独立交易监控站点的一站式导航页，纯静态站点，部署于 GitHub Pages。
 
 线上地址：https://surfacebuaa-maker.github.io/spread-yellow-pages/
 
@@ -19,3 +19,4 @@
 | 09 | OKX bStocks价差监控 | https://surfacebuaa-maker.github.io/sf-spread-monitor/ |
 | 10 | Backpack × Binance 价差雷达 | https://backpack-spread-radar.surface-buaa139523.chatgpt.site |
 | 11 | Hyperliquid 持仓上限监控 | https://hl-limit-watch.surface-buaa139523.chatgpt.site/ |
+| 12 | PerpScope 股票合约收盘偏离监控 | https://surfacebuaa-maker.github.io/perpscope-stock-monitor/ |

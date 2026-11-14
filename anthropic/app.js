@@ -152,7 +152,9 @@
       const hint = document.createElement('span'); hint.textContent = '累积更多采集记录后显示资金走势';
       box.append(strong, hint); $('chart').append(box); return;
     }
-    const W = 1000, H = 260, left = 63, right = 18, top = 22, bottom = 35;
+    // Match the actual chart size so mobile axis labels keep their readable pixel size.
+    const W = Math.max(300, $('chart').clientWidth), H = Math.max(220, $('chart').clientHeight);
+    const left = 54, right = 18, top = 22, bottom = 35;
     const maxAmount = Math.max(...samples.flatMap(s => keys.map(k => s[k]?.amount).filter(finite)), 1);
     const ceiling = Math.ceil(maxAmount / 1e6) * 1e6;
     const first = Date.parse(samples[0].timestamp), span = Math.max(1, end - first);
@@ -186,6 +188,11 @@
     document.querySelectorAll('[data-range]').forEach(b => { b.classList.toggle('selected', b === button); b.setAttribute('aria-pressed', String(b === button)); });
     paintChart();
   }));
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(paintChart, 100);
+  });
 
   function paintHistory() {
     $('history').replaceChildren();

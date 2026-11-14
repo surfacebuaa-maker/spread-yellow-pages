@@ -74,11 +74,32 @@
     const ended = source?.endAt && Date.now() >= Date.parse(source.endAt);
     document.title = triggered && !ended ? '⚑ 额度接近上限 · Anthropic 监控' : 'Anthropic 认购额度监控';
     $('alert-detail').textContent = alertsEnabled ? `已设为 ${threshold}%。提醒仅在页面打开时生效，数据延迟或抓取失败时请核对官网。` : '提醒仅在此页面打开时生效，采集会在后台持续进行。';
-    const failed = keys.filter(k => state.latest?.sources?.[k]?.lastError || (state.latest && stale(state.latest.sources?.[k])));
-    if (state.readError) showNotice('暂时无法读取网站更新，正在保留上次显示的数据。请检查网络后重试。');
-    else if (failed.length) showNotice(failed.map(k => k === 'bitget' ? 'Bitget' : 'Gate').join('、') + ' 数据延迟或采集失败。当前保留上次成功值，请打开官网核对额度。');
-    else if (triggered && !ended) showNotice(`额度提醒：Bitget 公开轮使用率已达 ${ratio.toFixed(2)}%，剩余 ${full(Math.max(0, source.cap - source.amount))}。请在官方页面确认当前可用额度。`, true);
-    else showNotice(null);
+    const failed = keys.filter(k => state.latest?.sources?.[k]?.lastError);
+    const delayed = keys.filter(k => state.latest && !failed.includes(k) && stale(state.latest.sources?.[k]));
+    const names = items => items.map(k => k === 'bitget' ? 'Bitget' : 'Gate').join('、');
+    if (state.latest) {
+      const status = state.readError ? '快照读取失败' : failed.length ? '后台抓取失败' : delayed.length ? '后台更新延迟' : '两家数据已更新';
+      $('health').className = 'status ' + (state.readError || failed.length || delayed.length ? 'warning' : '');
+      $('health').replaceChildren(document.createElement('i'), document.createTextNode(status));
+      $('checked-at').textContent = '最近后台检查 ' + time(state.latest.generatedAt) + ' · 计划每5分钟';
+      keys.forEach(key => {
+        const s = state.latest.sources[key];
+        if (!s) return;
+        const old = stale(s), closed = s.endAt && Date.now() >= Date.parse(s.endAt);
+        const tag = $(key + '-status');
+        tag.textContent = s.lastError ? '抓取失败 · 保留旧值' : old ? '旧快照 · 更新延迟' : closed ? '认购已截止' : '认购进行中';
+        tag.className = 'round-tag' + (!closed && !old && !s.lastError ? ' active' : '');
+        $(key + '-observed').title = s.lastError ? '最近采集失败；保留上次有效观测。' : '';
+      });
+      $('remaining-label').firstChild.textContent = !valid || state.readError ? '上次观测剩余额度 ' : '剩余可申购额度 ';
+    }
+    const notices = [];
+    if (triggered && !ended) notices.push(`额度提醒：Bitget 公开轮使用率已达 ${ratio.toFixed(2)}%，剩余 ${full(Math.max(0, source.cap - source.amount))}。请在官方页面确认当前可用额度。`);
+    if (state.readError) notices.push('暂时无法读取网站更新，当前保留上次显示的数据，请检查网络后重试。');
+    if (failed.length) notices.push(names(failed) + ' 最近一次后台抓取失败，当前保留上次成功值。');
+    if (delayed.length) notices.push(names(delayed) + ' 已超过15分钟未更新，后台定时更新延迟；当前为旧快照。');
+    if (failed.length || delayed.length) notices.push('请打开官方页面核对当前额度，或点击“后台任务”查看执行情况。');
+    showNotice(notices.join(' '), triggered && !ended);
   }
   $('enable-alert').addEventListener('click', () => {
     alertsEnabled = !alertsEnabled;
@@ -93,10 +114,6 @@
   function paint() {
     if (!state.latest) { paintAlerts(); return; }
     const sources = state.latest.sources;
-    const healthy = keys.every(k => sources[k] && !stale(sources[k]) && !sources[k].lastError);
-    $('health').className = 'status ' + (healthy ? '' : 'warning');
-    $('health').replaceChildren(Object.assign(document.createElement('i'), {}), document.createTextNode(healthy ? '两家数据已更新' : '部分数据需核对'));
-    $('checked-at').textContent = '最近采集 ' + time(state.latest.generatedAt) + ' · 约每5分钟更新';
     keys.forEach(key => {
       const s = sources[key];
       if (!s) return;
@@ -108,11 +125,6 @@
       $(key + '-end').textContent = time(s.endAt);
       $(key + '-countdown').textContent = countdown(s.endAt);
       $(key + '-observed').textContent = '数据时间 ' + time(s.observedAt);
-      const ended = s.endAt && Date.now() >= Date.parse(s.endAt);
-      const tag = $(key + '-status');
-      tag.textContent = stale(s) || s.lastError ? '数据待核对' : ended ? '认购已截止' : '认购进行中';
-      tag.className = 'round-tag' + (!ended && !stale(s) && !s.lastError ? ' active' : '');
-      if (s.lastError) $(key + '-observed').title = '最近采集失败；保留上次有效观测。';
     });
     const b = sources.bitget;
     if (finite(b?.amount) && b.cap > 0) {

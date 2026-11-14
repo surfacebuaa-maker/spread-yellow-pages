@@ -3,7 +3,7 @@
   const $ = id => document.getElementById(id);
   const root = document.documentElement;
   const keys = ['bitget', 'gate'];
-  const STALE_MS = 45 * 60 * 1000;
+  const STALE_MS = 15 * 60 * 1000;
   const state = { latest: null, samples: [], range: 24, loading: false, readError: null };
   const storage = {
     get(key, fallback) { try { return localStorage.getItem(key) ?? fallback; } catch { return fallback; } },
@@ -96,7 +96,7 @@
     const healthy = keys.every(k => sources[k] && !stale(sources[k]) && !sources[k].lastError);
     $('health').className = 'status ' + (healthy ? '' : 'warning');
     $('health').replaceChildren(Object.assign(document.createElement('i'), {}), document.createTextNode(healthy ? '两家数据已更新' : '部分数据需核对'));
-    $('checked-at').textContent = '最近采集 ' + time(state.latest.generatedAt) + ' · 约每15分钟更新';
+    $('checked-at').textContent = '最近采集 ' + time(state.latest.generatedAt) + ' · 约每5分钟更新';
     keys.forEach(key => {
       const s = sources[key];
       if (!s) return;

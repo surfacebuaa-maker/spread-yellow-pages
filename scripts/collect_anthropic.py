@@ -131,7 +131,7 @@ def collect(data_dir=DATA_DIR):
             data = fetch()
             observed = datetime.fromisoformat(data["observedAt"].replace("Z", "+00:00"))
             age = (datetime.now(timezone.utc) - observed).total_seconds()
-            if age < -300 or age > 2700:
+            if age < -300 or age > 900:
                 raise ValueError("Source timestamp is stale or invalid; retaining the last valid value")
             data.update({"fetchedAt": iso(), "lastAttemptAt": checked_at, "lastError": None})
             sources[key] = data
@@ -149,9 +149,9 @@ def collect(data_dir=DATA_DIR):
     history = read_json(data_dir / "history.json", {"schemaVersion": 1, "samples": []})
     if any(sample[key] is not None for key in ("bitget", "gate")):
         history["samples"] = [s for s in history["samples"] if s["timestamp"] != checked_at] + [sample]
-        # Retain 90 days of 15-minute records at most, preserving the actual observations.
-        history["samples"] = sorted(history["samples"], key=lambda s: s["timestamp"])[-8640:]
-    latest = {"schemaVersion": 1, "generatedAt": checked_at, "intervalSeconds": 900,
+        # Retain 90 days of 5-minute records at most, preserving the actual observations.
+        history["samples"] = sorted(history["samples"], key=lambda s: s["timestamp"])[-25920:]
+    latest = {"schemaVersion": 1, "generatedAt": checked_at, "intervalSeconds": 300,
               "currency": "USD", "scope": "public", "sources": sources}
     write_json(data_dir / "history.json", history)
     write_json(data_dir / "latest.json", latest)

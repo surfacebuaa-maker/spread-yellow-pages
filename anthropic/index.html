@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="light dark">
-  <meta name="description" content="关注 Bitget 公开轮与 Gate 的 Anthropic 认购额度、剩余空间和截止时间，每约 15 分钟采集公开统计。">
+  <meta name="description" content="关注 Bitget 公开轮与 Gate 的 Anthropic 认购额度、剩余空间和截止时间，每约 5 分钟采集公开统计。">
   <title>Anthropic 认购额度监控</title>
   <link rel="stylesheet" href="style.css">
   <script src="app.js" defer></script>
@@ -53,7 +53,7 @@
 
       <section class="history-panel" aria-labelledby="history-title"><div class="section-heading"><div><p class="eyebrow">OBSERVATIONS</p><h2 id="history-title">最近采集记录</h2></div><button id="export" class="text-button" type="button" disabled>下载 CSV ↓</button></div><div class="table-scroll"><table><thead><tr><th>采集时间（北京）</th><th>Bitget 公开轮</th><th>Bitget 余量</th><th>Gate</th><th>采集情况</th></tr></thead><tbody id="history"><tr><td colspan="5" class="empty">正在读取历史记录…</td></tr></tbody></table></div></section>
 
-      <details class="method"><summary>数据来源与更新说明 <span>＋</span></summary><div><p>后台约每 15 分钟采集一次，GitHub 调度和网站发布可能有延迟；页面每 60 秒检查一次已发布数据。“检查更新”会读取最新采集结果，不会立即触发交易所抓取。</p><p>Bitget 仅读取公开轮的总投入金额与总认购上限。余量＝上限－已投入金额；总认购上限不代表最终获配额度。Gate 若未公开总上限，不估算余量，也不显示满额百分比。</p><p>数据超过 45 分钟未更新会标记延迟。抓取失败时保留上次成功值与原始数据时间，历史缺失不补零。近 1 小时净增仅在有接近 1 小时的有效观测时显示。</p><p>资金可能集中在最后阶段进入；页面余额与截止时间以官方最新规则为准。请在提交认购前打开官方页面核对可用额度。</p><a href="https://github.com/surfacebuaa-maker/spread-yellow-pages/actions/workflows/anthropic-monitor.yml" target="_blank" rel="noopener noreferrer">查看后台采集运行记录 ↗</a></div></details>
+      <details class="method"><summary>数据来源与更新说明 <span>＋</span></summary><div><p>后台约每 5 分钟采集一次，GitHub 调度和网站发布可能有延迟；页面每 60 秒检查一次已发布数据。“检查更新”会读取最新采集结果，不会立即触发交易所抓取。</p><p>Bitget 仅读取公开轮的总投入金额与总认购上限。余量＝上限－已投入金额；总认购上限不代表最终获配额度。Gate 若未公开总上限，不估算余量，也不显示满额百分比。</p><p>数据超过 15 分钟未更新会标记延迟。抓取失败时保留上次成功值与原始数据时间，历史缺失不补零。近 1 小时净增仅在有接近 1 小时的有效观测时显示。</p><p>资金可能集中在最后阶段进入；页面余额与截止时间以官方最新规则为准。请在提交认购前打开官方页面核对可用额度。</p><a href="https://github.com/surfacebuaa-maker/spread-yellow-pages/actions/workflows/anthropic-monitor.yml" target="_blank" rel="noopener noreferrer">查看后台采集运行记录 ↗</a></div></details>
     </main>
     <footer><span>ANTHROPIC IPO WATCH</span><span>公开额度观察 · 所有时间均为北京时间（UTC+8）</span><a href="../">返回监控黄页 ↗</a></footer>
   </div>

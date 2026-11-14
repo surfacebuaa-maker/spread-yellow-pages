@@ -30,6 +30,11 @@ jobs:
       collection: ${{ steps.collect.outcome }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          # A queued dispatch may refer to a commit older than the saved observations.
+          # Always collect on the latest main so history is appended to its newest state.
+          ref: main
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -75,9 +80,11 @@ jobs:
       - name: Report collection failures after publishing last known values
         env:
           COLLECTION: ${{ needs.collect.outputs.collection }}
+          SAVED: ${{ needs.collect.result }}
+          DEPLOYED: ${{ needs.deploy.result }}
         run: |
-          if [ "$COLLECTION" != 'success' ]; then
-            echo 'One or more sources failed. Published diagnostics and last known observations.'
+          if [ "$COLLECTION" != 'success' ] || [ "$SAVED" != 'success' ] || [ "$DEPLOYED" != 'success' ]; then
+            echo 'Collection, history saving, or publication did not complete successfully.'
             exit 1
           fi
   continue-monitoring:

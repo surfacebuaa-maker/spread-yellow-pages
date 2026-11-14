@@ -51,11 +51,7 @@ jobs:
             git push origin HEAD:main
           fi
       - name: Prepare public site
-        run: |
-          mkdir -p _site/anthropic/data
-          cp index.html .nojekyll _site/
-          cp anthropic/index.html anthropic/app.js anthropic/style.css _site/anthropic/
-          cp anthropic/data/*.json _site/anthropic/data/
+        run: python scripts/prepare_site.py
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

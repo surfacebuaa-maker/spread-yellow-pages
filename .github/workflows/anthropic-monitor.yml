@@ -80,3 +80,19 @@ jobs:
             echo 'One or more sources failed. Published diagnostics and last known observations.'
             exit 1
           fi
+  continue-monitoring:
+    needs: [collect, deploy, check]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    permissions:
+      contents: read
+      actions: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Continue collection after five minutes
+        env:
+          MONITOR_GITHUB_TOKEN: ${{ github.token }}
+        run: python scripts/continue_monitoring.py

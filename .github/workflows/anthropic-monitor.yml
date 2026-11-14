@@ -1,0 +1,85 @@
+name: Anthropic subscription monitor
+
+on:
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - '.nojekyll'
+      - 'anthropic/**'
+      - 'scripts/**'
+      - '.github/workflows/anthropic-monitor.yml'
+
+concurrency:
+  group: anthropic-pages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      collection: ${{ steps.collect.outcome }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: scripts/requirements.txt
+      - run: pip install -r scripts/requirements.txt
+      - name: Collect public subscription statistics
+        id: collect
+        continue-on-error: true
+        run: python scripts/collect_anthropic.py
+      - name: Save observed history
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add anthropic/data/latest.json anthropic/data/history.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'data: update Anthropic public subscription observations'
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
+      - name: Prepare public site
+        run: |
+          mkdir -p _site/anthropic/data
+          cp index.html .nojekyll _site/
+          cp anthropic/index.html anthropic/app.js anthropic/style.css _site/anthropic/
+          cp anthropic/data/*.json _site/anthropic/data/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+  deploy:
+    needs: collect
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v4
+        id: deployment
+  check:
+    needs: [collect, deploy]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report collection failures after publishing last known values
+        env:
+          COLLECTION: ${{ needs.collect.outputs.collection }}
+        run: |
+          if [ "$COLLECTION" != 'success' ]; then
+            echo 'One or more sources failed. Published diagnostics and last known observations.'
+            exit 1
+          fi

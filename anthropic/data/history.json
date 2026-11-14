@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "samples": [
+    {
+      "timestamp": "2026-11-14T10:29:49Z",
+      "bitget": {
+        "amount": 16520051.7975,
+        "participants": 2677,
+        "observedAt": "2026-11-14T10:29:41Z",
+        "cap": 200000000.0
+      },
+      "gate": {
+        "amount": 25088510.09,
+        "participants": 2047,
+        "observedAt": "2026-11-14T10:29:50Z",
+        "cap": null
+      }
+    }
+  ]
+}

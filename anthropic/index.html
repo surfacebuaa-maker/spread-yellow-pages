@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="关注 Bitget 公开轮与 Gate 的 Anthropic 认购额度、剩余空间和截止时间，每约 15 分钟采集公开统计。">
+  <title>Anthropic 认购额度监控</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div class="shell">
+    <nav class="topbar" aria-label="站点导航">
+      <a class="back" href="../">← 监控黄页</a>
+      <span class="navmark">IPO WATCH <span>/ ANTHROPIC</span></span>
+      <button id="theme" class="icon-button" type="button" aria-label="切换明暗模式">◐</button>
+    </nav>
+    <header class="page-header">
+      <div><p class="eyebrow">PUBLIC SUBSCRIPTION · 公开认购</p><h1>Anthropic<span>认购额度监控</span></h1><p class="intro">关注剩余额度与截止时间，把申购节奏看清楚。</p></div>
+      <div class="update-box"><span id="health" class="status pending"><i></i>正在读取数据</span><p id="checked-at">读取最新采集结果…</p><button id="refresh" class="text-button" type="button">↻ 检查更新</button></div>
+    </header>
+
+    <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+    <main>
+      <section class="platforms" aria-label="平台额度与截止时间">
+        <article class="platform bitget" id="bitget-card">
+          <div class="card-heading"><div class="brand"><span class="brand-icon">B</span><div><h2>Bitget</h2><p>IPO Prime · 公开轮</p></div></div><span id="bitget-status" class="round-tag">读取中</span></div>
+          <div class="primary-label">剩余可申购额度 <span>USD</span></div>
+          <div class="hero-number" id="remaining">—</div>
+          <div class="capacity-line"><span>额度使用率 <strong id="utilization">—</strong></span><span id="cap-label">总上限 —</span></div>
+          <div class="capacity-track" role="progressbar" aria-label="Bitget 公开轮额度使用率" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="capacity"><div id="capacity-fill"></div></div>
+          <div id="capacity-caption" class="capacity-caption">等待最新额度信息</div>
+          <div class="stats-grid"><div><span>已申购金额</span><strong id="bitget-amount">—</strong></div><div><span>参与人数</span><strong id="bitget-people">—</strong></div><div><span>近 1 小时净增</span><strong id="bitget-hour">—</strong></div><div><span>距认购截止</span><strong id="bitget-countdown">—</strong></div></div>
+          <div class="deadline"><span>认购截止（北京时间）</span><strong id="bitget-end">—</strong></div>
+          <div class="card-bottom"><span id="bitget-observed">数据时间 —</span><a href="https://www.bitget.com/spotlight/ipo-prime" target="_blank" rel="noopener noreferrer">查看官方认购页 ↗</a></div>
+        </article>
+
+        <article class="platform gate" id="gate-card">
+          <div class="card-heading"><div class="brand"><span class="brand-icon">G</span><div><h2>Gate</h2><p>IPO Access · Anthropic</p></div></div><span id="gate-status" class="round-tag">读取中</span></div>
+          <div class="primary-label">剩余可申购额度</div>
+          <div class="unknown-cap">上限未公布<span>无法判断距离满额还有多少</span></div>
+          <div class="unknown-note"><span>i</span><p>官方公开统计暂未给出总认购上限。以下金额可用于观察资金变化，不能据此判断是否即将满额。</p></div>
+          <div class="stats-grid"><div><span>已申购金额</span><strong id="gate-amount">—</strong></div><div><span>参与人数</span><strong id="gate-people">—</strong></div><div><span>近 1 小时净增</span><strong id="gate-hour">—</strong></div><div><span>距认购截止</span><strong id="gate-countdown">—</strong></div></div>
+          <div class="deadline"><span>认购截止（北京时间）</span><strong id="gate-end">—</strong></div>
+          <div class="card-bottom"><span id="gate-observed">数据时间 —</span><a href="https://www.gate.com/ipos/ipo-access/anthropic-ipo-access/69" target="_blank" rel="noopener noreferrer">查看官方认购页 ↗</a></div>
+        </article>
+      </section>
+
+      <section class="alert-panel" aria-labelledby="alert-title"><div class="alert-copy"><span class="bell">♧</span><div><h2 id="alert-title">额度接近上限时提醒</h2><p>Bitget 使用率达到阈值后，页面显示醒目提示。</p></div></div><label class="threshold-label" for="threshold">提醒阈值 <select id="threshold"><option value="80">80%</option><option value="90" selected>90%</option><option value="95">95%</option><option value="98">98%</option><option value="100">100%</option></select></label><button id="enable-alert" class="button" type="button" aria-pressed="false">启用页面提醒</button><p class="alert-footnote" id="alert-detail">提醒仅在此页面打开时生效，采集会在后台持续进行。</p></section>
+
+      <section class="chart-panel" aria-labelledby="chart-title"><div class="section-heading"><div><p class="eyebrow">FUND FLOW</p><h2 id="chart-title">申购资金走势</h2></div><div class="ranges" role="group" aria-label="走势时间范围"><button type="button" data-range="6">6 小时</button><button type="button" data-range="24" class="selected" aria-pressed="true">24 小时</button><button type="button" data-range="0">全部</button></div></div><div class="chart-legend"><span><i class="bitget-dot"></i>Bitget 公开轮</span><span><i class="gate-dot"></i>Gate</span><span class="chart-unit">单位：万美元 · 北京时间</span></div><div id="chart" class="chart" role="img" aria-label="两家平台的累计申购金额走势"></div><p id="chart-caption" class="panel-caption">历史从首次采集开始记录。</p></section>
+
+      <section class="history-panel" aria-labelledby="history-title"><div class="section-heading"><div><p class="eyebrow">OBSERVATIONS</p><h2 id="history-title">最近采集记录</h2></div><button id="export" class="text-button" type="button" disabled>下载 CSV ↓</button></div><div class="table-scroll"><table><thead><tr><th>采集时间（北京）</th><th>Bitget 公开轮</th><th>Bitget 余量</th><th>Gate</th><th>采集情况</th></tr></thead><tbody id="history"><tr><td colspan="5" class="empty">正在读取历史记录…</td></tr></tbody></table></div></section>
+
+      <details class="method"><summary>数据来源与更新说明 <span>＋</span></summary><div><p>后台约每 15 分钟采集一次，GitHub 调度和网站发布可能有延迟；页面每 60 秒检查一次已发布数据。“检查更新”会读取最新采集结果，不会立即触发交易所抓取。</p><p>Bitget 仅读取公开轮的总投入金额与总认购上限。余量＝上限－已投入金额；总认购上限不代表最终获配额度。Gate 若未公开总上限，不估算余量，也不显示满额百分比。</p><p>数据超过 45 分钟未更新会标记延迟。抓取失败时保留上次成功值与原始数据时间，历史缺失不补零。近 1 小时净增仅在有接近 1 小时的有效观测时显示。</p><p>资金可能集中在最后阶段进入；页面余额与截止时间以官方最新规则为准。请在提交认购前打开官方页面核对可用额度。</p><a href="https://github.com/surfacebuaa-maker/spread-yellow-pages/actions/workflows/anthropic-monitor.yml" target="_blank" rel="noopener noreferrer">查看后台采集运行记录 ↗</a></div></details>
+    </main>
+    <footer><span>ANTHROPIC IPO WATCH</span><span>公开额度观察 · 所有时间均为北京时间（UTC+8）</span><a href="../">返回监控黄页 ↗</a></footer>
+  </div>
+</body>
+</html>

@@ -8940,6 +8940,21 @@
         "observedAt": "2026-11-16T12:17:43Z",
         "cap": null
       }
+    },
+    {
+      "timestamp": "2026-11-16T12:22:46Z",
+      "bitget": {
+        "amount": 36682519.2559,
+        "participants": 4923,
+        "observedAt": "2026-11-16T12:22:44Z",
+        "cap": 200000000.0
+      },
+      "gate": {
+        "amount": 58132667.19,
+        "participants": 4073,
+        "observedAt": "2026-11-16T12:22:47Z",
+        "cap": null
+      }
     }
   ]
 }

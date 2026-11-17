@@ -1,34 +1,34 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-17T08:58:00Z",
+  "generatedAt": "2026-11-17T09:03:00Z",
   "intervalSeconds": 300,
   "currency": "USD",
   "scope": "public",
   "sources": {
     "bitget": {
-      "amount": 64529897.1928,
-      "participants": 7608,
+      "amount": 64602157.5311,
+      "participants": 7623,
       "cap": 200000000.0,
       "startAt": "2026-11-10T08:00:00Z",
       "endAt": "2026-11-18T08:00:00Z",
-      "observedAt": "2026-11-17T08:57:35Z",
+      "observedAt": "2026-11-17T09:02:41Z",
       "sourceUrl": "https://www.bitget.com/spotlight/ipo-prime",
       "label": "Bitget 公开轮",
-      "fetchedAt": "2026-11-17T08:58:01Z",
-      "lastAttemptAt": "2026-11-17T08:58:00Z",
+      "fetchedAt": "2026-11-17T09:03:00Z",
+      "lastAttemptAt": "2026-11-17T09:03:00Z",
       "lastError": null
     },
     "gate": {
-      "amount": 150933760.98,
-      "participants": 8320,
+      "amount": 152021782.27,
+      "participants": 8384,
       "cap": null,
       "startAt": "2026-11-12T03:00:00Z",
       "endAt": "2026-11-17T09:00:00Z",
-      "observedAt": "2026-11-17T08:58:01Z",
+      "observedAt": "2026-11-17T09:03:01Z",
       "sourceUrl": "https://www.gate.com/ipos/ipo-access/anthropic-ipo-access/69",
       "label": "Gate IPO Access",
-      "fetchedAt": "2026-11-17T08:58:01Z",
-      "lastAttemptAt": "2026-11-17T08:58:00Z",
+      "fetchedAt": "2026-11-17T09:03:01Z",
+      "lastAttemptAt": "2026-11-17T09:03:00Z",
       "lastError": null
     }
   }

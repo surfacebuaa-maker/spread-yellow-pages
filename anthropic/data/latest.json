@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-25T09:02:16Z",
+  "generatedAt": "2026-11-25T19:08:46Z",
   "intervalSeconds": 300,
   "currency": "USD",
   "scope": "public",
@@ -11,11 +11,11 @@
       "cap": 200000000.0,
       "startAt": "2026-11-10T08:00:00Z",
       "endAt": "2026-11-18T08:00:00Z",
-      "observedAt": "2026-11-25T09:02:18Z",
+      "observedAt": "2026-11-25T19:08:46Z",
       "sourceUrl": "https://www.bitget.com/spotlight/ipo-prime",
       "label": "Bitget 公开轮",
-      "fetchedAt": "2026-11-25T09:02:18Z",
-      "lastAttemptAt": "2026-11-25T09:02:16Z",
+      "fetchedAt": "2026-11-25T19:08:46Z",
+      "lastAttemptAt": "2026-11-25T19:08:46Z",
       "lastError": null
     },
     "gate": {
@@ -28,8 +28,8 @@
       "sourceUrl": "https://www.gate.com/ipos/ipo-access/anthropic-ipo-access/69",
       "label": "Gate IPO Access",
       "fetchedAt": "2026-11-25T09:02:18Z",
-      "lastAttemptAt": "2026-11-25T09:02:16Z",
-      "lastError": null
+      "lastAttemptAt": "2026-11-25T19:08:46Z",
+      "lastError": "Gate response did not identify Anthropic project 69"
     }
   }
 }
